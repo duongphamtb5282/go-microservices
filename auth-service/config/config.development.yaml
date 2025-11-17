@@ -1,0 +1,227 @@
+server:
+  port: "${SERVER_PORT:8085}"
+  host: "${SERVER_HOST:0.0.0.0}"
+  read_timeout: "${SERVER_READ_TIMEOUT:30s}"
+  write_timeout: "${SERVER_WRITE_TIMEOUT:30s}"
+  idle_timeout: "${SERVER_IDLE_TIMEOUT:120s}"
+
+database:
+  type: "postgres"
+  host: "localhost"
+  port: 5432
+  username: "postgres"
+  password: "postgres"
+  name: "auth_service"
+  ssl_mode: "disable"
+  max_connections: 10
+  max_idle_connections: 5
+  connection_max_lifetime: "1h"
+
+cache:
+  name: "${CACHE_NAME:auth-cache}"
+  addr: "${CACHE_ADDR:localhost:6379}"
+  password: "${CACHE_PASSWORD:}"
+  db: ${CACHE_DB:0}
+  use_cluster: ${CACHE_USE_CLUSTER:false}
+  cluster_addrs: ${CACHE_CLUSTER_ADDRS:[]}
+  pool_size: ${CACHE_POOL_SIZE:10}
+  min_idle_conns: ${CACHE_MIN_IDLE_CONNS:5}
+  max_retries: ${CACHE_MAX_RETRIES:3}
+  dial_timeout: "${CACHE_DIAL_TIMEOUT:5s}"
+  read_timeout: "${CACHE_READ_TIMEOUT:3s}"
+  write_timeout: "${CACHE_WRITE_TIMEOUT:3s}"
+
+logging:
+  level: "${LOG_LEVEL:debug}"
+  format: "${LOG_FORMAT:json}"
+  output: "${LOG_OUTPUT:stdout}"
+  file:
+    enabled: ${LOG_FILE_ENABLED:true}
+    path: "${LOG_FILE_PATH:logs/auth-service.log}"
+    max_size: ${LOG_FILE_MAX_SIZE:100}
+    max_backups: ${LOG_FILE_MAX_BACKUPS:3}
+    max_age: ${LOG_FILE_MAX_AGE:28}
+    compress: ${LOG_FILE_COMPRESS:true}
+
+kafka:
+  brokers: ${KAFKA_BROKERS:["localhost:9092"]}
+  group_id: "${KAFKA_GROUP_ID:auth-service}"
+  topics:
+    user_events: "${KAFKA_TOPIC_USER_EVENTS:user.events}"
+    auth_events: "${KAFKA_TOPIC_AUTH_EVENTS:auth.events}"
+    audit_logs: "${KAFKA_TOPIC_AUDIT_LOGS:audit.logs}"
+  retry_count: ${KAFKA_RETRY_COUNT:3}
+  retry_backoff: "${KAFKA_RETRY_BACKOFF:1s}"
+
+jwt:
+  secret: "${JWT_SECRET:dev-jwt-secret-change-in-production}"
+  expiration: "${JWT_EXPIRATION:24h}"
+  refresh_expiration: "${JWT_REFRESH_EXPIRATION:168h}"
+  issuer: "${JWT_ISSUER:auth-service}"
+  audience: "${JWT_AUDIENCE:auth-service-api}"
+  algorithm: "${JWT_ALGORITHM:HS256}"
+  bcrypt_cost: ${JWT_BCRYPT_COST:10}
+
+mfa:
+  required_factors: ${MFA_REQUIRED_FACTORS:["totp"]}
+  optional_factors: ${MFA_OPTIONAL_FACTORS:["sms", "email", "push"]}
+  risk_based_mfa: ${MFA_RISK_BASED:true}
+  mfa_threshold: ${MFA_THRESHOLD:0.7}
+  factor_timeout: "${MFA_FACTOR_TIMEOUT:5m}"
+  max_attempts: ${MFA_MAX_ATTEMPTS:3}
+  backup_codes: ${MFA_BACKUP_CODES:true}
+  backup_code_count: ${MFA_BACKUP_CODE_COUNT:10}
+
+sso:
+  token_validation_interval: "${SSO_TOKEN_VALIDATION_INTERVAL:5m}"
+  session_timeout: "${SSO_SESSION_TIMEOUT:8h}"
+  refresh_threshold: "${SSO_REFRESH_THRESHOLD:1h}"
+  max_concurrent_sessions: ${SSO_MAX_CONCURRENT_SESSIONS:5}
+
+session:
+  default_timeout: "${SESSION_DEFAULT_TIMEOUT:8h}"
+  idle_timeout: "${SESSION_IDLE_TIMEOUT:2h}"
+  max_sessions: ${SESSION_MAX_SESSIONS:5}
+  refresh_threshold: "${SESSION_REFRESH_THRESHOLD:1h}"
+  cleanup_interval: "${SESSION_CLEANUP_INTERVAL:15m}"
+  secure_cookies: ${SESSION_SECURE_COOKIES:false}
+  http_only_cookies: ${SESSION_HTTP_ONLY_COOKIES:true}
+  same_site_policy: "${SESSION_SAME_SITE_POLICY:Lax}"
+
+totp:
+  issuer: "${TOTP_ISSUER:AuthService}"
+  secret_length: ${TOTP_SECRET_LENGTH:20}
+  window_size: ${TOTP_WINDOW_SIZE:1}
+
+sms:
+  provider: "${SMS_PROVIDER:console}"
+  api_key: "${SMS_API_KEY:}"
+  api_secret: "${SMS_API_SECRET:}"
+  from_number: "${SMS_FROM_NUMBER:}"
+
+email:
+  provider: "${EMAIL_PROVIDER:console}"
+  api_key: "${EMAIL_API_KEY:}"
+  from_email: "${EMAIL_FROM_EMAIL:noreply@authservice.com}"
+
+push:
+  provider: "${PUSH_PROVIDER:console}"
+  api_key: "${PUSH_API_KEY:}"
+
+risk:
+  base_risk_score: ${RISK_BASE_RISK_SCORE:0.1}
+  risk_factors:
+    new_device: ${RISK_NEW_DEVICE:0.2}
+    suspicious_device: ${RISK_SUSPICIOUS_DEVICE:0.3}
+    new_location: ${RISK_NEW_LOCATION:0.2}
+    suspicious_location: ${RISK_SUSPICIOUS_LOCATION:0.4}
+    high_risk_country: ${RISK_HIGH_RISK_COUNTRY:0.3}
+    vpn: ${RISK_VPN:0.1}
+    tor: ${RISK_TOR:0.5}
+    unusual_time: ${RISK_UNUSUAL_TIME:0.2}
+    recent_failures: ${RISK_RECENT_FAILURES:0.3}
+    new_account: ${RISK_NEW_ACCOUNT:0.1}
+    unusual_behavior: ${RISK_UNUSUAL_BEHAVIOR:0.2}
+  mfa_threshold: ${RISK_MFA_THRESHOLD:0.7}
+  block_threshold: ${RISK_BLOCK_THRESHOLD:0.9}
+  trusted_devices: ${RISK_TRUSTED_DEVICES:true}
+  geo_fencing: ${RISK_GEO_FENCING:true}
+  time_based_rules: ${RISK_TIME_BASED_RULES:true}
+
+audit:
+  retention_days: ${AUDIT_RETENTION_DAYS:90}
+  real_time_alerts: ${AUDIT_REAL_TIME_ALERTS:true}
+
+pingam:
+  base_url: "${PINGAM_BASE_URL:http://localhost:1080}"
+  client_id: "${PINGAM_CLIENT_ID:auth-service-client}"
+  client_secret: "${PINGAM_CLIENT_SECRET:your-client-secret}"
+  redirect_uri: "${PINGAM_REDIRECT_URI:http://localhost:8085/callback}"
+  scopes: ${PINGAM_SCOPES:["openid", "profile", "email", "groups"]}
+  timeout: "${PINGAM_TIMEOUT:30s}"
+  retry_attempts: ${PINGAM_RETRY_ATTEMPTS:3}
+  cache_ttl: "${PINGAM_CACHE_TTL:5m}"
+  enable_sso: ${PINGAM_ENABLE_SSO:true}
+  enable_mfa: ${PINGAM_ENABLE_MFA:true}
+  enable_risk_based: ${PINGAM_ENABLE_RISK_BASED:true}
+
+  saml:
+    entity_id: "${PINGAM_SAML_ENTITY_ID:auth-service}"
+    sso_url: "${PINGAM_SAML_SSO_URL:https://pingam.company.com/saml/sso}"
+    slo_url: "${PINGAM_SAML_SLO_URL:https://pingam.company.com/saml/slo}"
+    certificate: "${PINGAM_SAML_CERTIFICATE:/etc/ssl/pingam/cert.pem}"
+    private_key: "${PINGAM_SAML_PRIVATE_KEY:/etc/ssl/pingam/key.pem}"
+    enabled: ${PINGAM_SAML_ENABLED:true}
+
+  oauth:
+    authorization_url: "${PINGAM_OAUTH_AUTHORIZATION_URL:https://pingam.company.com/oauth/authorize}"
+    token_url: "${PINGAM_OAUTH_TOKEN_URL:https://pingam.company.com/oauth/token}"
+    userinfo_url: "${PINGAM_OAUTH_USERINFO_URL:https://pingam.company.com/oauth/userinfo}"
+    scopes: ${PINGAM_OAUTH_SCOPES:["openid", "profile", "email", "groups"]}
+    enabled: ${PINGAM_OAUTH_ENABLED:true}
+
+  policy:
+    policy_url: "${PINGAM_POLICY_URL:https://pingam.company.com/policy}"
+    decision_url: "${PINGAM_POLICY_DECISION_URL:https://pingam.company.com/authorize}"
+    enable_rbac: ${PINGAM_POLICY_ENABLE_RBAC:true}
+    enabled: ${PINGAM_POLICY_ENABLED:true}
+  sensitive_fields: ${PINGAM_SENSITIVE_FIELDS:["password", "secret", "token"]}
+  alert_thresholds:
+    failed_login: ${PINGAM_ALERT_FAILED_LOGIN:5}
+    suspicious_activity: ${PINGAM_ALERT_SUSPICIOUS_ACTIVITY:3}
+
+security:
+  password_min_length: ${SECURITY_PASSWORD_MIN_LENGTH:8}
+  password_max_length: ${SECURITY_PASSWORD_MAX_LENGTH:128}
+  max_login_attempts: ${SECURITY_MAX_LOGIN_ATTEMPTS:5}
+  lockout_duration: "${SECURITY_LOCKOUT_DURATION:15m}"
+  session_timeout: "${SECURITY_SESSION_TIMEOUT:24h}"
+  require_email_verification: ${SECURITY_REQUIRE_EMAIL_VERIFICATION:true}
+
+cors:
+  enabled: ${CORS_ENABLED:true}
+  allowed_origins: ${CORS_ALLOWED_ORIGINS:["http://localhost:3000", "http://localhost:8080", "http://localhost:8085"]}
+  allowed_methods: ${CORS_ALLOWED_METHODS:["GET", "POST", "PUT", "DELETE", "OPTIONS"]}
+  allowed_headers: ${CORS_ALLOWED_HEADERS:["Content-Type", "Authorization", "X-Requested-With"]}
+
+rate_limit:
+  enabled: ${RATE_LIMIT_ENABLED:true}
+  requests_per_minute: ${RATE_LIMIT_REQUESTS_PER_MINUTE:100}
+
+health_check:
+  enabled: ${HEALTH_CHECK_ENABLED:true}
+  interval: "${HEALTH_CHECK_INTERVAL:30s}"
+  timeout: "${HEALTH_CHECK_TIMEOUT:5s}"
+
+telemetry:
+  enabled: ${TELEMETRY_ENABLED:true}
+  service_name: "${TELEMETRY_SERVICE_NAME:auth-service}"
+  service_version: "${TELEMETRY_SERVICE_VERSION:1.0.0}"
+  environment: "${TELEMETRY_ENVIRONMENT:development}"
+  otlp_endpoint: "${TELEMETRY_OTLP_ENDPOINT:localhost:4318}"
+  jaeger_endpoint: "${TELEMETRY_JAEGER_ENDPOINT:http://localhost:14268/api/traces}"
+  prometheus_port: "${TELEMETRY_PROMETHEUS_PORT:8888}"
+
+authorization:
+  identity_provider: "${IDENTITY_PROVIDER_MODE:database}"
+  mode: "${AUTHORIZATION_MODE:jwt}"
+  enabled: ${AUTHORIZATION_ENABLED:true}
+
+  jwt_auth:
+    use_roles: ${JWT_AUTH_USE_ROLES:true}
+    use_permissions: ${JWT_AUTH_USE_PERMISSIONS:true}
+    roles_claim_key: "${JWT_AUTH_ROLES_CLAIM_KEY:roles}"
+    permissions_claim_key: "${JWT_AUTH_PERMISSIONS_CLAIM_KEY:permissions}"
+
+  pingam_auth:
+    enabled: ${PINGAM_AUTH_ENABLED:false}
+    cache_ttl: "${PINGAM_AUTH_CACHE_TTL:5m}"
+    fallback_to_jwt: ${PINGAM_AUTH_FALLBACK_TO_JWT:true}
+
+keycloak:
+  base_url: "http://localhost:8081"
+  realm: "auth-service"
+  client_id: "auth-service-client"
+  client_secret: "your-client-secret-change-in-production"
+  admin_username: "admin"
+  admin_password: "admin"

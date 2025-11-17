@@ -1,0 +1,109 @@
+# Application Stack for Auth Service
+# Includes the application and its databases
+# Usage: docker-compose -f auth-service/docker-compose.app.yml up -d
+
+version: "3.8"
+
+services:
+  # =============================================================================
+  # DATABASE SERVICES
+  # =============================================================================
+
+  postgres:
+    image: postgres:15
+    container_name: auth-service-postgres
+    environment:
+      POSTGRES_DB: auth_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: auth-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+
+  # =============================================================================
+  # APPLICATION SERVICE
+  # =============================================================================
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-service-app
+    ports:
+      - "8085:8085"
+    environment:
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=auth_service
+      - DATABASE_SSL_MODE=disable
+      - CACHE_ADDR=redis:6379
+      - KAFKA_BROKERS=kafka:9092
+      - JWT_SECRET=dev-jwt-secret-change-in-production
+      - LOG_LEVEL=debug
+      - TELEMETRY_ENABLED=true
+      - TELEMETRY_OTLP_ENDPOINT=http://otel-collector:4318
+      - TELEMETRY_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8085/api/v1/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+# =============================================================================
+# NETWORKS & VOLUMES
+# =============================================================================
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

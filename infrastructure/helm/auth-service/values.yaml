@@ -1,0 +1,343 @@
+# Default values for auth-service
+# This is a YAML-formatted file.
+
+# Global configuration
+global:
+  imageRegistry: "your-registry.com"
+  imagePullSecrets: []
+  storageClass: ""
+
+# Image configuration
+image:
+  registry: ""
+  repository: "auth-service"
+  tag: "latest"
+  pullPolicy: Always
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+  labels: {}
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: auth.yourcompany.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: auth-service-tls
+      hosts:
+        - auth.yourcompany.com
+
+# Deployment configuration
+deployment:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+
+  # Resource limits and requests
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+  # Node selector
+  nodeSelector: {}
+
+  # Tolerations
+  tolerations: []
+
+  # Affinity
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - auth-service
+            topologyKey: kubernetes.io/hostname
+
+  # Pod security context
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+
+  # Container security context
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+
+# Horizontal Pod Autoscaler
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+  metrics:
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: "1000"
+
+# Service Monitor for Prometheus
+serviceMonitor:
+  enabled: true
+  namespace: monitoring
+  interval: 15s
+  path: /metrics
+  labels: {}
+
+# Configuration
+config:
+  # Application configuration
+  app:
+    env: "production"
+    logLevel: "info"
+    port: 8080
+
+  # Database configuration
+  database:
+    host: "postgres.auth-system.svc.cluster.local"
+    port: 5432
+    database: "auth_service"
+    sslMode: "require"
+    maxConnections: 100
+    maxIdleConnections: 25
+    connectionMaxLifetime: "1h"
+    queryTimeout: "30s"
+    slowQueryThreshold: "1s"
+
+  # Redis configuration
+  redis:
+    addrs: "redis-cluster.auth-system.svc.cluster.local:6379"
+    password: ""
+    db: 0
+    poolSize: 50
+    minIdleConns: 20
+    useCluster: true
+
+  # Security configuration
+  security:
+    rateLimit:
+      enabled: true
+      requestsPerMinute: 100
+      burstLimit: 20
+    securityHeaders:
+      enabled: true
+      hsts: true
+      contentTypeOptions: true
+      frameOptions: "DENY"
+      xssProtection: true
+    audit:
+      enabled: true
+      logAllAuthEvents: true
+      retentionDays: 90
+
+# Secrets (should be overridden in production)
+secrets:
+  database:
+    username: "auth_user"
+    password: "CHANGE_ME"
+  redis:
+    password: "CHANGE_ME"
+  jwt:
+    secret: "CHANGE_ME"
+  apiKeys: []
+
+# External dependencies
+externalServices:
+  postgres:
+    enabled: false
+    host: ""
+    port: 5432
+    database: "auth_service"
+    username: "auth_user"
+    password: ""
+
+  redis:
+    enabled: false
+    host: ""
+    port: 6379
+    password: ""
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  otel:
+    endpoint: "http://otel-collector.monitoring.svc.cluster.local:4318"
+    serviceName: "auth-service"
+    serviceVersion: "1.0.0"
+
+# Logging configuration
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+
+# Volume configuration
+volumes:
+  - name: config
+    configMap:
+      name: auth-service-config
+  - name: logs
+    emptyDir: {}
+
+# Volume mounts
+volumeMounts:
+  - name: config
+    mountPath: /app/config
+    readOnly: true
+  - name: logs
+    mountPath: /app/logs
+
+# Health checks
+healthCheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+  startupProbe:
+    httpGet:
+      path: /health
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app: auth-service
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    - to: []
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 5432
+          protocol: TCP
+        - port: 6379
+          protocol: TCP
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+  maxUnavailable: 1
+
+# Service mesh configuration (Istio)
+istio:
+  enabled: false
+  gateway:
+    enabled: false
+    hosts:
+      - auth.yourcompany.com
+  virtualService:
+    enabled: false
+    hosts:
+      - auth.yourcompany.com
+    gateways:
+      - auth-system/auth-gateway
+
+# Backup configuration
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  retention: "7d"
+  storage:
+    type: s3
+    bucket: "auth-service-backups"
+    region: "us-east-1"
+
+# Environment specific overrides
+environments:
+  development:
+    deployment:
+      replicas: 1
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    config:
+      app:
+        env: "development"
+        logLevel: "debug"
+
+  staging:
+    deployment:
+      replicas: 2
+    config:
+      app:
+        env: "staging"
+        logLevel: "info"
+
+  production:
+    deployment:
+      replicas: 5
+    config:
+      app:
+        env: "production"
+        logLevel: "warn"

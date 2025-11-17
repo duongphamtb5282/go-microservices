@@ -1,0 +1,94 @@
+# Development Environment Configuration
+# This file contains development-specific settings
+
+server:
+  port: "8085"
+  host: "localhost"
+  read_timeout: "30s"
+  write_timeout: "30s"
+  idle_timeout: "120s"
+
+database:
+  type: "postgres"
+  host: "localhost"
+  port: 5432
+  username: "postgres"
+  password: "postgres"
+  database: "auth_service"
+  ssl_mode: "disable"
+  max_connections: 100
+  max_idle_connections: 25
+  connection_max_lifetime: "1h"
+  connection_max_idle_time: "30m"
+  query_timeout: "30s"
+  acquire_timeout: "30s"
+  acquire_retry_attempts: 3
+  prepared_statement_cache_size: 100
+  log_level: "info"
+  slow_threshold: "200ms"
+
+cache:
+  name: "auth-cache-dev"
+  addrs: "localhost:6379"
+  password: ""
+  db: 0
+  use_cluster: false
+  cluster_addrs: []
+  pool_size: 50
+  min_idle_conns: 20
+  max_retries: 5
+  dial_timeout: "10s"
+  read_timeout: "5s"
+  write_timeout: "5s"
+  pool_timeout: "30s"
+  idle_timeout: "5m"
+  idle_check_frequency: "1m"
+  pipeline_window: "50ms"
+  pipeline_limit: 100
+  pipeline_concurrency: 10
+
+logging:
+  level: "info"
+  format: "json"
+  output: "stdout"
+  file:
+    enabled: false
+    path: "logs/auth-service.log"
+    max_size: 100
+    max_backups: 3
+    max_age: 28
+    compress: true
+
+jwt:
+  secret: "dev-secret-key"
+  expiration: "24h"
+  issuer: "auth-service-dev"
+
+rate_limit:
+  enabled: false
+  requests_per_minute: 1000
+
+cors:
+  enabled: true
+  allowed_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+    - "http://localhost:8085"
+  allowed_methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
+    - "OPTIONS"
+  allowed_headers:
+    - "Content-Type"
+    - "Authorization"
+
+kafka:
+  brokers:
+    - "localhost:9092"
+
+health_check:
+  enabled: true
+  interval: "30s"
+  timeout: "5s"

@@ -1,0 +1,222 @@
+version: "3.8"
+
+services:
+  # =============================================================================
+  # CACHING INFRASTRUCTURE
+  # =============================================================================
+
+  redis:
+    image: redis:7-alpine
+    container_name: auth-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+
+  # =============================================================================
+  # MESSAGING INFRASTRUCTURE
+  # =============================================================================
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: auth-service-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    container_name: auth-service-kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --zookeeper zookeeper:2181 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  # =============================================================================
+  # IDENTITY MANAGEMENT - KEYCLOAK
+  # =============================================================================
+
+  keycloak-postgres:
+    image: postgres:15-alpine
+    container_name: auth-service-keycloak-postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - keycloak_postgres_data:/var/lib/postgresql/data
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0
+    container_name: auth-service-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_HOSTNAME: localhost
+      KC_HTTP_PORT: 8081
+      KC_HTTPS_PORT: 8443
+    ports:
+      - "8081:8080" # Keycloak admin console
+      - "8443:8443" # HTTPS (optional)
+    depends_on:
+      keycloak-postgres:
+        condition: service_healthy
+    networks:
+      - dev-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n' >&3;grep -q '200 OK' <&3",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # =============================================================================
+  # DATABASE
+  # =============================================================================
+
+  postgres:
+    image: postgres:15
+    container_name: auth-service-postgres
+    environment:
+      POSTGRES_DB: auth_service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # =============================================================================
+  # APPLICATION SERVICE
+  # =============================================================================
+
+# This configuration block is defining a service named `auth-service` in a Docker Compose file. Here's what it's doing:
+# auth-service:
+#   build:
+#     context: .
+#     dockerfile: Dockerfile
+#   container_name: auth-service-app
+#   ports:
+#     - "8085:8085"
+#   environment:
+#     - DATABASE_HOST=postgres
+#     - DATABASE_PORT=5432
+#     - DATABASE_USERNAME=postgres
+#     - DATABASE_PASSWORD=postgres
+#     - DATABASE_NAME=auth_service
+#     - DATABASE_SSL_MODE=disable
+#     - CACHE_ADDR=redis:6379
+#     - KAFKA_BROKERS=kafka:9092
+#     - JWT_SECRET=dev-jwt-secret-change-in-production
+#     - LOG_LEVEL=debug
+#     - TELEMETRY_ENABLED=false
+#   depends_on:
+#     postgres:
+#       condition: service_healthy
+#     redis:
+#       condition: service_healthy
+#     kafka:
+#       condition: service_healthy
+#   networks:
+#     - dev-network
+#   healthcheck:
+#     test:
+#       [
+#         "CMD",
+#         "wget",
+#         "--quiet",
+#         "--tries=1",
+#         "--spider",
+#         "http://localhost:8085/api/v1/health",
+#       ]
+#     interval: 30s
+#     timeout: 10s
+#     retries: 3
+#   restart: unless-stopped
+
+# =============================================================================
+# NETWORKS & VOLUMES
+# =============================================================================
+
+networks:
+  dev-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+  kafka_data:
+    driver: local
+  keycloak_postgres_data:
+    driver: local
+  postgres_data:
+    driver: local

@@ -1,0 +1,22 @@
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.889+0700","msg":"Temporarily disabling telemetry for testing"}
+{"level":"WARN","timestamp":"2025-11-02T10:03:46.909+0700","msg":"Failed to initialize database, using in-memory storage","error":"failed to connect to database: failed to connect to PostgreSQL: failed to connect to `host=localhost user=auth_user database=auth_service`: dial error (dial tcp 127.0.0.1:5432: connect: connection refused)","host":"localhost","port":5432,"username":"auth_user","database":"auth_service"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.910+0700","msg":"Worker pool started","pool_name":"auth-service-worker-pool","num_workers":10,"queue_size":1000}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.910+0700","msg":"Temporarily disabling telemetry for testing"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.910+0700","msg":"Temporarily disabling telemetry for testing"}
+{"level":"WARN","timestamp":"2025-11-02T10:03:46.910+0700","msg":"Invalid JWT expiry duration, using default 24h","error":"time: invalid duration \"\"","configured_expiry":""}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.910+0700","msg":"Creating JWT manager","issuer":"auth-service","audience":"auth-service-api","token_duration":86400}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.911+0700","msg":"Creating Auth manager","bcrypt_cost":10}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.911+0700","msg":"🔍 UserRepositoryProvider called","db_type":"<nil>"}
+{"level":"WARN","timestamp":"2025-11-02T10:03:46.911+0700","msg":"⚠️ Database is nil, falling back to memory"}
+{"level":"ERROR","timestamp":"2025-11-02T10:03:46.912+0700","msg":"Failed to create Kafka producer with backend-core","error":"failed to create sync producer: kafka: invalid configuration (Producer.MaxMessageBytes must be > 0)","brokers":"[localhost:9092]","client_id":"auth-service-producer","error_details":"failed to create sync producer: kafka: invalid configuration (Producer.MaxMessageBytes must be > 0)"}
+{"level":"WARN","timestamp":"2025-11-02T10:03:46.912+0700","msg":"Backend-core Kafka producer failed, trying fallback with kafka-go","error_details":"failed to create sync producer: kafka: invalid configuration (Producer.MaxMessageBytes must be > 0)"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.912+0700","msg":"✅ Kafka fallback writer created successfully","brokers":"[localhost:9092]","topic":"user.events"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.912+0700","msg":"Temporarily disabling telemetry providers for testing"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.912+0700","msg":"Registered task handler","pool_name":"auth-service-worker-pool","task_type":"auth_handler"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.914+0700","msg":"Temporarily disabling telemetry middleware for testing"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.914+0700","msg":"Creating route manager"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.914+0700","msg":"Setting up routes"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.916+0700","msg":"All routes registered successfully"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.916+0700","msg":"Routes setup completed"}
+{"level":"INFO","timestamp":"2025-11-02T10:03:46.917+0700","msg":"Starting HTTP server","port":"8085"}
+{"level":"FATAL","timestamp":"2025-11-02T10:03:46.917+0700","msg":"Failed to start server","error":"listen tcp :8085: bind: address already in use"}

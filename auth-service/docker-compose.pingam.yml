@@ -1,0 +1,195 @@
+services:
+  # PingAM (ForgeRock Identity Platform - Open Source Alternative)
+  # Using ForgeRock's OpenAM as a PingAM alternative for development
+  pingam:
+    image: gcr.io/forgerock-io/openam/openam:7.2.0
+    container_name: auth-pingam
+    ports:
+      - "8090:8080"
+    environment:
+      # OpenAM Configuration
+      CATALINA_OPTS: "-server -Xmx2048m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=512m"
+      ROOT_USER_PASSWORD: "pingam_admin_password"
+      ADMIN_PASSWORD: "pingam_admin_password"
+
+      # OpenAM Instance Configuration
+      SERVER_URL: "http://localhost:8090"
+      COOKIE_DOMAIN: "localhost"
+
+      # Java Options
+      JAVA_OPTS: "-Xms1024m -Xmx2048m"
+    volumes:
+      - pingam_data:/usr/openam/config
+      - ./config/pingam:/opt/config
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/openam/isAlive.jsp"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # PingDirectory (LDAP Directory Server)
+  # For user authentication and authorization
+  pingdirectory:
+    image: pingidentity/pingdirectory:latest
+    container_name: auth-pingdirectory
+    environment:
+      # Server Configuration
+      SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+      SERVER_PROFILE_PATH: baseline/pingdirectory
+
+      # Admin Credentials
+      ROOT_USER_PASSWORD: pingdirectory_admin
+
+      # LDAP Configuration
+      MAX_HEAP_SIZE: 1g
+      LDAP_PORT: 1389
+      LDAPS_PORT: 1636
+      HTTPS_PORT: 1443
+    ports:
+      - "1389:1389" # LDAP
+      - "1636:1636" # LDAPS
+      - "1443:1443" # HTTPS
+    volumes:
+      - pingdirectory_data:/opt/out
+    networks:
+      - auth-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/opt/out/instance/bin/status",
+          "--bindDN",
+          "cn=administrator",
+          "--bindPassword",
+          "pingdirectory_admin",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  # PingFederate (Federation Server for SSO)
+  # Handles OAuth2, OIDC, SAML
+  pingfederate:
+    image: pingidentity/pingfederate:latest
+    container_name: auth-pingfederate
+    environment:
+      # Server Configuration
+      SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+      SERVER_PROFILE_PATH: baseline/pingfederate
+
+      # Admin Configuration
+      PING_IDENTITY_ACCEPT_EULA: "YES"
+      PING_IDENTITY_PASSWORD: pingfederate_admin
+
+      # Java Configuration
+      MAX_HEAP_SIZE: 1g
+
+      # OAuth/OIDC Configuration
+      PF_ENGINE_PORT: 9031
+      PF_ADMIN_PORT: 9999
+    ports:
+      - "9031:9031" # Engine Port
+      - "9999:9999" # Admin Console
+    volumes:
+      - pingfederate_data:/opt/out
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9031/pf/heartbeat.ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # PingAccess (API Gateway and Web Access Management)
+  # Provides policy-based access control
+  pingaccess:
+    image: pingidentity/pingaccess:latest
+    container_name: auth-pingaccess
+    environment:
+      # Server Configuration
+      SERVER_PROFILE_URL: https://github.com/pingidentity/pingidentity-server-profiles.git
+      SERVER_PROFILE_PATH: baseline/pingaccess
+
+      # Admin Configuration
+      PING_IDENTITY_ACCEPT_EULA: "YES"
+      PING_IDENTITY_PASSWORD: pingaccess_admin
+
+      # Java Configuration
+      MAX_HEAP_SIZE: 1g
+
+      # Port Configuration
+      PA_ENGINE_PORT: 3000
+      PA_ADMIN_PORT: 9000
+    ports:
+      - "3000:3000" # Engine Port
+      - "9000:9000" # Admin Console
+    volumes:
+      - pingaccess_data:/opt/out
+    networks:
+      - auth-network
+    depends_on:
+      pingfederate:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD", "curl", "-k", "-f", "https://localhost:9000/pa/heartbeat.ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  # Mock PingAM Server (For Development/Testing)
+  # A lightweight mock server for PingAM API
+  pingam-mock:
+    image: mockserver/mockserver:latest
+    container_name: auth-pingam-mock
+    ports:
+      - "1080:1080" # MockServer Port
+      - "1090:1090" # MockServer UI
+    environment:
+      MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/initializerJson.json
+    volumes:
+      - ./config/pingam-mock/mockserver.properties:/config/mockserver.properties
+      - ./config/pingam-mock/initializerJson.json:/config/initializerJson.json
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1080/mockserver/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Swagger UI for API Documentation
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: auth-swagger-ui
+    ports:
+      - "8081:8080"
+    environment:
+      SWAGGER_JSON: /swagger/openapi.yaml
+      # Removed BASE_URL to make it accessible at root (/)
+    volumes:
+      - ./docs/swagger:/swagger
+    networks:
+      - auth-network
+
+volumes:
+  pingam_data:
+    driver: local
+  pingdirectory_data:
+    driver: local
+  pingfederate_data:
+    driver: local
+  pingaccess_data:
+    driver: local
+
+networks:
+  auth-network:
+    external: true
+    name: auth-network

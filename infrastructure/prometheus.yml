@@ -1,0 +1,91 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'production'
+    cluster: 'auth-cluster'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  # OpenTelemetry Collector metrics
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8888']
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+
+  # Auth Service metrics
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['host.docker.internal:8085']
+    scrape_interval: 15s
+    metrics_path: '/metrics'
+    params:
+      format: ['prometheus']
+
+  # Redis Exporter metrics
+  - job_name: 'redis-cluster'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 15s
+
+  # PostgreSQL Exporter metrics
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 15s
+    params:
+      format: ['prometheus']
+
+  # Host system metrics
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 30s
+
+  # Docker metrics
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['docker-exporter:9323']
+    scrape_interval: 30s
+
+  # Kafka metrics (if available)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+    scrape_interval: 30s
+
+  # Load Balancer metrics (NGINX)
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+    scrape_interval: 15s
+
+  # Application-specific metrics
+  - job_name: 'auth-service-instances'
+    static_configs:
+      - targets:
+        - 'auth-service-1:8080'
+        - 'auth-service-2:8080'
+        - 'auth-service-3:8080'
+    scrape_interval: 10s
+    metrics_path: '/metrics'
+    relabel_configs:
+      - source_labels: ['__address__']
+        target_label: 'instance'
+        regex: '([^:]+):.*'
+        replacement: '${1}'
+
+
+  # cAdvisor for container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 30s

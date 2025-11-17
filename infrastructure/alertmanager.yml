@@ -1,0 +1,49 @@
+global:
+  smtp_smarthost: 'localhost:587'
+  smtp_from: 'alertmanager@example.com'
+  smtp_auth_username: ''
+  smtp_auth_password: ''
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'default'
+  routes:
+  - match:
+      severity: critical
+    receiver: 'critical'
+  - match:
+      severity: warning
+    receiver: 'warning'
+
+receivers:
+- name: 'default'
+  email_configs:
+  - to: 'admin@example.com'
+    send_resolved: true
+
+- name: 'critical'
+  email_configs:
+  - to: 'admin@example.com'
+    subject: 'CRITICAL: {{ .GroupLabels.alertname }}'
+    body: |
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      Runbook: {{ .Annotations.runbook_url }}
+      {{ end }}
+  webhook_configs:
+  - url: 'http://localhost:8080/webhook'  # Replace with your webhook URL
+    send_resolved: true
+
+- name: 'warning'
+  email_configs:
+  - to: 'admin@example.com'
+    subject: 'WARNING: {{ .GroupLabels.alertname }}'
+    body: |
+      {{ range .Alerts }}
+      Alert: {{ .Annotations.summary }}
+      Description: {{ .Annotations.description }}
+      {{ end }}

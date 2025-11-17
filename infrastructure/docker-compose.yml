@@ -1,0 +1,413 @@
+# Infrastructure Stack for Auth Service
+# Includes caching, messaging, monitoring, observability, and metric exporters
+# Usage: docker-compose -f infrastructure/docker-compose.yml up -d
+
+services:
+  # =============================================================================
+  # CACHING & MESSAGING INFRASTRUCTURE
+  # =============================================================================
+
+  redis:
+    image: redis:7-alpine
+    container_name: auth-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    restart: unless-stopped
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: auth-service-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    container_name: auth-service-kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --zookeeper zookeeper:2181 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: auth-service-kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - auth-network
+    restart: unless-stopped
+
+  # =============================================================================
+  # MONITORING & OBSERVABILITY
+  # =============================================================================
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: auth-service-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=200h"
+      - "--web.enable-lifecycle"
+      - "--web.listen-address=:9090"
+    depends_on:
+      - redis
+      - kafka
+    networks:
+      - observability
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9090/-/healthy",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: auth-service-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/auth-service-overview.json
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - observability
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/api/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: auth-service-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    networks:
+      - observability
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:latest
+    container_name: auth-service-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - observability
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: auth-service-promtail
+    ports:
+      - "9080:9080" # Expose HTTP metrics endpoint
+    volumes:
+      - /var/log:/var/log:ro
+      - ./logs:/tmp/auth-service-logs:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - observability
+      - auth-network # Add auth-network to access other services
+    depends_on:
+      - loki
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9080/ready",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: auth-service-otel-collector
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8888:8888" # Prometheus metrics
+      - "8889:8889" # Health check
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol-contrib/otel-collector-config.yml:ro
+    command: ["--config", "/etc/otelcol-contrib/otel-collector-config.yml"]
+    depends_on:
+      - jaeger
+      - prometheus
+    networks:
+      - observability
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8889/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    container_name: auth-service-jaeger
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14268:14268" # Jaeger collector
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=memory
+      - MEMORY_MAX_TRACES=50000
+    networks:
+      - observability
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:16686/",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # =============================================================================
+  # METRIC EXPORTERS
+  # =============================================================================
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: auth-service-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+      - "--collector.filesystem.ignored-mount-points=^/(run|var|snap).*$"
+    networks:
+      - observability
+    restart: unless-stopped
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:latest
+    container_name: auth-service-kafka-exporter
+    ports:
+      - "9308:9308"
+    environment:
+      - KAFKA_SERVER=kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - observability
+    restart: unless-stopped
+    command: ["--kafka.server=kafka:9092"]
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: auth-service-cadvisor
+    ports:
+      - "9323:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - observability
+    restart: unless-stopped
+    privileged: true
+
+  # =============================================================================
+  # IDENTITY MANAGEMENT - KEYCLOAK
+  # =============================================================================
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: auth-service-postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../auth-service/scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0
+    container_name: auth-service-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_HOSTNAME: localhost
+      KC_HTTP_PORT: 8081
+      KC_HTTPS_PORT: 8443
+    ports:
+      - "8081:8081" # Keycloak admin console
+      - "8443:8443" # HTTPS (optional)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auth-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/127.0.0.1/8080;echo -e 'GET /health/ready HTTP/1.1\r\nhost: localhost\r\nConnection: close\r\n\r\n' >&3;grep -q '200 OK' <&3",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+# =============================================================================
+# NETWORKS & VOLUMES
+# =============================================================================
+
+networks:
+  auth-network:
+    driver: bridge
+  observability:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local
+  kafka_data:
+    driver: local
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local

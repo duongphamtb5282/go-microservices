@@ -1,0 +1,414 @@
+version: "3.8"
+
+services:
+  # Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: auth-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/ssl:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - auth-service-1
+      - auth-service-2
+      - auth-service-3
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+        reservations:
+          memory: 128M
+          cpus: "0.25"
+
+  # Auth Service instances (horizontal scaling)
+  auth-service-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-service-1
+    environment:
+      # Database
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: auth_service
+      DATABASE_USERNAME: auth_user
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_SSL_MODE: disable
+
+      # Redis Cluster
+      CACHE_ADDRS: redis-node1:6379,redis-node2:6379,redis-node3:6379
+      CACHE_PASSWORD: ${REDIS_PASSWORD}
+
+      # Application
+      APP_ENV: production
+      LOG_LEVEL: info
+      PORT: 8080
+
+      # Security
+      JWT_SECRET: ${JWT_SECRET}
+
+      # Monitoring
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4318
+    volumes:
+      - ./config:/app/config:ro
+      - auth_logs_1:/app/logs
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  auth-service-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-service-2
+    environment:
+      # Same configuration as service-1
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: auth_service
+      DATABASE_USERNAME: auth_user
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_SSL_MODE: disable
+
+      CACHE_ADDRS: redis-node1:6379,redis-node2:6379,redis-node3:6379
+      CACHE_PASSWORD: ${REDIS_PASSWORD}
+
+      APP_ENV: production
+      LOG_LEVEL: info
+      PORT: 8080
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4318
+    volumes:
+      - ./config:/app/config:ro
+      - auth_logs_2:/app/logs
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  auth-service-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: auth-service-3
+    environment:
+      # Same configuration as service-1
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: auth_service
+      DATABASE_USERNAME: auth_user
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_SSL_MODE: disable
+
+      CACHE_ADDRS: redis-node1:6379,redis-node2:6379,redis-node3:6379
+      CACHE_PASSWORD: ${REDIS_PASSWORD}
+
+      APP_ENV: production
+      LOG_LEVEL: info
+      PORT: 8080
+
+      JWT_SECRET: ${JWT_SECRET}
+
+      OTEL_EXPORTER_OTLP_ENDPOINT: otel-collector:4318
+    volumes:
+      - ./config:/app/config:ro
+      - auth_logs_3:/app/logs
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+
+  # PostgreSQL Database with enhanced configuration
+  postgres:
+    image: postgres:15-alpine
+    container_name: auth-postgres
+    environment:
+      POSTGRES_DB: auth_service
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_service"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+        reservations:
+          memory: 1G
+          cpus: "1.0"
+
+  # Redis Cluster for high availability
+  redis-node1:
+    image: redis:7-alpine
+    container_name: redis-node1
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_data_1:/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+  redis-node2:
+    image: redis:7-alpine
+    container_name: redis-node2
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+    ports:
+      - "6381:6379"
+    volumes:
+      - redis_data_2:/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+  redis-node3:
+    image: redis:7-alpine
+    container_name: redis-node3
+    command: redis-server --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --appendonly yes --port 6379
+    ports:
+      - "6382:6379"
+    volumes:
+      - redis_data_3:/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+  # Redis Cluster Setup
+  redis-setup:
+    image: redis:7-alpine
+    container_name: redis-setup
+    depends_on:
+      redis-node1:
+        condition: service_healthy
+      redis-node2:
+        condition: service_healthy
+      redis-node3:
+        condition: service_healthy
+    networks:
+      - auth-network
+    command: |
+      bash -c '
+        sleep 10
+        redis-cli --cluster create redis-node1:6379 redis-node2:6379 redis-node3:6379 --cluster-replicas 0 --cluster-yes
+        echo "Redis cluster setup complete"
+      '
+    profiles:
+      - setup
+
+  # OpenTelemetry Collector for observability
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: auth-otel-collector
+    ports:
+      - "4318:4318" # OTLP HTTP
+      - "4317:4317" # OTLP gRPC
+      - "8888:8888" # Metrics
+    volumes:
+      - ./otel-collector-config.yml:/etc/otelcol/config.yaml:ro
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:13133/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: auth-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: auth-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data_1:
+    driver: local
+  redis_data_2:
+    driver: local
+  redis_data_3:
+    driver: local
+  auth_logs_1:
+    driver: local
+  auth_logs_2:
+    driver: local
+  auth_logs_3:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  auth-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,0 +1,228 @@
+[
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/oauth/token"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "access_token": "mock_access_token_12345",
+        "refresh_token": "mock_refresh_token_67890",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "scope": "openid profile email groups"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/oauth/authenticate"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "user_id": "user-123",
+        "username": "testuser",
+        "email": "testuser@example.com",
+        "access_token": "mock_access_token_12345",
+        "refresh_token": "mock_refresh_token_67890",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "scope": "openid profile email groups",
+        "issued_at": "2024-01-01T00:00:00Z"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/oauth/introspect"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "active": true,
+        "user_id": "user-123",
+        "username": "testuser",
+        "scope": "openid profile email groups",
+        "client_id": "auth-service-client",
+        "token_type": "Bearer",
+        "expires_at": "2024-12-31T23:59:59Z",
+        "issued_at": "2024-01-01T00:00:00Z"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/oauth/userinfo"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "sub": "user-123",
+        "username": "testuser",
+        "email": "testuser@example.com",
+        "email_verified": true,
+        "name": "Test User",
+        "given_name": "Test",
+        "family_name": "User",
+        "roles": ["user", "admin"],
+        "groups": ["developers", "admins"]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/authorize/decision"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "decision": "Permit",
+        "allowed": true,
+        "resource": "*",
+        "action": "*",
+        "user_id": "user-123"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/api/authorize"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "decision": "Permit",
+        "allowed": true,
+        "resource": "*",
+        "action": "*",
+        "user_id": "user-123"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/authorize/roles/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "roles": ["user", "admin", "developer"]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/api/users/.*/roles"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": ["user", "admin", "developer"]
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/authorize/permissions/.*"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "permissions": [
+          "users:read",
+          "users:write",
+          "users:delete",
+          "orders:read",
+          "orders:write"
+        ]
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/api/users/.*/permissions"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": [
+        "users:read",
+        "users:write",
+        "users:delete",
+        "orders:read",
+        "orders:write"
+      ]
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "POST",
+      "path": "/oauth/revoke"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "message": "Token revoked successfully"
+      }
+    }
+  },
+  {
+    "httpRequest": {
+      "method": "GET",
+      "path": "/health"
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "headers": {
+        "Content-Type": ["application/json"]
+      },
+      "body": {
+        "status": "healthy",
+        "service": "pingam-mock",
+        "timestamp": "2024-01-01T00:00:00Z"
+      }
+    }
+  }
+]
+

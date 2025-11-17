@@ -1,0 +1,881 @@
+openapi: 3.0.3
+info:
+  title: Auth Service API with PingAM Integration
+  description: |
+    Comprehensive authentication and authorization service with PingAM integration.
+    
+    **Features:**
+    - User authentication and registration
+    - PingAM SSO integration
+    - OAuth2/OIDC support
+    - Role-based access control (RBAC)
+    - Permission management
+    - Session management
+    - Token management (access & refresh tokens)
+    
+    **Base URL:** `http://localhost:8085/api/v1`
+  version: 1.0.0
+  contact:
+    name: Auth Service Team
+    email: auth-service@example.com
+
+servers:
+  - url: http://localhost:8085/api/v1
+    description: Local Development Server
+  - url: http://localhost:1080
+    description: PingAM Mock Server
+  - url: http://localhost:8090
+    description: PingAM Server (OpenAM)
+
+tags:
+  - name: Authentication
+    description: Standard authentication endpoints
+  - name: PingAM Authentication
+    description: PingAM SSO authentication endpoints
+  - name: PingAM Authorization
+    description: PingAM authorization and permission endpoints
+  - name: User Management
+    description: User CRUD operations
+  - name: Health Check
+    description: Service health monitoring
+
+paths:
+  # ========== Standard Authentication Endpoints ==========
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login with username and password
+      description: Authenticate user with username/email and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              standard:
+                summary: Standard login
+                value:
+                  username: "testuser"
+                  password: "password123"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Invalidate user session and tokens
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get a new access token using refresh token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  # ========== PingAM Authentication Endpoints ==========
+  /pingam/auth/login:
+    post:
+      tags:
+        - PingAM Authentication
+      summary: Login with PingAM
+      description: Authenticate user through PingAM SSO
+      operationId: pingamLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PingAMLoginRequest'
+            examples:
+              standard:
+                summary: Standard PingAM login
+                value:
+                  username: "testuser"
+                  password: "password123"
+                  domain: "example.com"
+      responses:
+        '200':
+          description: PingAM authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingAMAuthResponse'
+              examples:
+                success:
+                  summary: Successful authentication
+                  value:
+                    access_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refresh_token: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    token_type: "Bearer"
+                    expires_in: 3600
+                    user_id: "user-123"
+                    username: "testuser"
+                    scope: "openid profile email groups"
+                    issued_at: "2024-01-01T00:00:00Z"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /pingam/auth/sessions/{sessionId}:
+    get:
+      tags:
+        - PingAM Authentication
+      summary: Validate session
+      description: Validate PingAM session token
+      operationId: validateSession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          description: Session ID or token to validate
+          schema:
+            type: string
+            example: "session_abc123xyz"
+      responses:
+        '200':
+          description: Session is valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionInfo'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /pingam/auth/refresh-token:
+    post:
+      tags:
+        - PingAM Authentication
+      summary: Refresh PingAM token
+      description: Refresh access token using PingAM refresh token
+      operationId: pingamRefreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PingAMRefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PingAMAuthResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /pingam/auth/revoke-token:
+    post:
+      tags:
+        - PingAM Authentication
+      summary: Revoke token
+      description: Revoke PingAM access or refresh token
+      operationId: pingamRevokeToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PingAMRevokeTokenRequest'
+      responses:
+        '200':
+          description: Token revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  # ========== PingAM Authorization Endpoints ==========
+  /pingam/authz/check:
+    post:
+      tags:
+        - PingAM Authorization
+      summary: Check permission
+      description: Check if user has permission to perform action on resource
+      operationId: checkPermission
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionCheckRequest'
+            examples:
+              readUsers:
+                summary: Check read users permission
+                value:
+                  user_id: "user-123"
+                  resource: "users"
+                  action: "read"
+              writeOrders:
+                summary: Check write orders permission
+                value:
+                  user_id: "user-123"
+                  resource: "orders"
+                  action: "write"
+      responses:
+        '200':
+          description: Permission check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionCheckResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /pingam/authz/roles/{userId}:
+    get:
+      tags:
+        - PingAM Authorization
+      summary: Get user roles
+      description: Retrieve all roles assigned to a user
+      operationId: getUserRoles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            example: "user-123"
+      responses:
+        '200':
+          description: User roles retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRolesResponse'
+              examples:
+                adminUser:
+                  summary: Admin user roles
+                  value:
+                    user_id: "user-123"
+                    roles: ["admin", "user", "developer"]
+                    count: 3
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /pingam/authz/permissions/{userId}:
+    get:
+      tags:
+        - PingAM Authorization
+      summary: Get user permissions
+      description: Retrieve all permissions granted to a user
+      operationId: getUserPermissions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+            example: "user-123"
+      responses:
+        '200':
+          description: User permissions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPermissionsResponse'
+              examples:
+                adminPermissions:
+                  summary: Admin permissions
+                  value:
+                    user_id: "user-123"
+                    permissions:
+                      - "users:read"
+                      - "users:write"
+                      - "users:delete"
+                      - "orders:read"
+                      - "orders:write"
+                    count: 5
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ========== User Management Endpoints ==========
+  /users:
+    post:
+      tags:
+        - User Management
+      summary: Create user
+      description: Create a new user
+      operationId: createUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+    get:
+      tags:
+        - User Management
+      summary: List users
+      description: Get list of users with pagination
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersListResponse'
+
+  /users/{id}:
+    get:
+      tags:
+        - User Management
+      summary: Get user by ID
+      description: Retrieve user details by ID
+      operationId: getUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{id}/activate:
+    post:
+      tags:
+        - User Management
+      summary: Activate user
+      description: Activate a user account
+      operationId: activateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  # ========== Health Check Endpoints ==========
+  /health:
+    get:
+      tags:
+        - Health Check
+      summary: Service health check
+      description: Check if the service is healthy
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /pingam/health:
+    get:
+      tags:
+        - Health Check
+      summary: PingAM health check
+      description: Check if PingAM integration is healthy
+      operationId: pingamHealthCheck
+      responses:
+        '200':
+          description: PingAM is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: PingAM is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+# ========== Components ==========
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer token authentication
+
+  schemas:
+    # ===== Request Schemas =====
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "testuser"
+        password:
+          type: string
+          format: password
+          example: "password123"
+
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: "newuser"
+        email:
+          type: string
+          format: email
+          example: "newuser@example.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePass123!"
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    PingAMLoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "testuser"
+        password:
+          type: string
+          format: password
+          example: "password123"
+        domain:
+          type: string
+          example: "example.com"
+
+    PingAMRefreshTokenRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    PingAMRevokeTokenRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    PermissionCheckRequest:
+      type: object
+      required:
+        - user_id
+        - resource
+        - action
+      properties:
+        user_id:
+          type: string
+          example: "user-123"
+        resource:
+          type: string
+          example: "users"
+        action:
+          type: string
+          enum: [read, write, delete, update]
+          example: "read"
+
+    CreateUserRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: "newuser"
+        email:
+          type: string
+          format: email
+          example: "newuser@example.com"
+        password:
+          type: string
+          format: password
+          example: "SecurePass123!"
+
+    # ===== Response Schemas =====
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          example: "Bearer"
+        expires_in:
+          type: integer
+          example: 3600
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          example: "Bearer"
+        expires_in:
+          type: integer
+          example: 3600
+
+    PingAMAuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refresh_token:
+          type: string
+          example: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+        token_type:
+          type: string
+          example: "Bearer"
+        expires_in:
+          type: integer
+          example: 3600
+        user_id:
+          type: string
+          example: "user-123"
+        username:
+          type: string
+          example: "testuser"
+        scope:
+          type: string
+          example: "openid profile email groups"
+        issued_at:
+          type: string
+          format: date-time
+          example: "2024-01-01T00:00:00Z"
+
+    SessionInfo:
+      type: object
+      properties:
+        session_id:
+          type: string
+        user_id:
+          type: string
+        is_active:
+          type: boolean
+        expires_at:
+          type: string
+          format: date-time
+        last_access:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    PermissionCheckResponse:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+          example: true
+        user_id:
+          type: string
+          example: "user-123"
+        resource:
+          type: string
+          example: "users"
+        action:
+          type: string
+          example: "read"
+
+    UserRolesResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: "user-123"
+        roles:
+          type: array
+          items:
+            type: string
+          example: ["admin", "user", "developer"]
+        count:
+          type: integer
+          example: 3
+
+    UserPermissionsResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+          example: "user-123"
+        permissions:
+          type: array
+          items:
+            type: string
+          example: ["users:read", "users:write", "orders:read"]
+        count:
+          type: integer
+          example: 3
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UsersListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Operation successful"
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "healthy"
+        service:
+          type: string
+          example: "auth-service"
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        details:
+          type: string
+        code:
+          type: string
+
+  # ===== Reusable Responses =====
+  responses:
+    BadRequestError:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Invalid request"
+            details: "Missing required field: username"
+            code: "BAD_REQUEST"
+
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Unauthorized"
+            details: "Invalid or expired token"
+            code: "UNAUTHORIZED"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Not found"
+            details: "User not found"
+            code: "NOT_FOUND"
+
+    ConflictError:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Conflict"
+            details: "User already exists"
+            code: "CONFLICT"
+

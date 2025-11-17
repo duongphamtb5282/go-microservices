@@ -1,0 +1,292 @@
+{"level":"INFO","timestamp":"2025-10-07T22:21:40.391+0700","msg":"starting notification-service","version":"1.0.0","port":"8086"}
+{"level":"INFO","timestamp":"2025-10-07T22:21:40.392+0700","msg":"notification service started successfully","topic":"user.events","group_id":"notification-service","brokers":"[localhost:9092]"}
+{"level":"INFO","timestamp":"2025-10-07T22:21:40.392+0700","msg":"starting message consumption","topic":"user.events","group_id":"notification-service"}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.368+0700","msg":"received message","topic":"user.events","partition":0,"offset":18,"key":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2"}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.374+0700","msg":"parsed message data","data":{"aggregate_id":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2","email":"testuser1000@example.com","event_id":"0ba11b95-4e73-40cb-aba3-08ee712e01fa","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T15:27:34.599711Z","user_id":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2","username":"testuser1000","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.375+0700","msg":"processing user created event","event_id":"0ba11b95-4e73-40cb-aba3-08ee712e01fa","event_type":"user.created","user_id":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2","username":"testuser1000","email":"testuser1000@example.com","timestamp":"2025-10-07T15:27:34Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.375+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"0ba11b95-4e73-40cb-aba3-08ee712e01fa","user_id":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2","username":"testuser1000","email":"testuser1000@example.com","timestamp":"2025-10-07 15:27:34"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 498af9cc-5fd1-48b0-86b4-3f65e52cfcc2
+   👤 Username: testuser1000
+   📧 Email: testuser1000@example.com
+   ⏰ Timestamp: 2025-10-07 15:27:34
+   🔗 Event ID: 0ba11b95-4e73-40cb-aba3-08ee712e01fa
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.375+0700","msg":"TODO: send welcome email to new user","email":"testuser1000@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.375+0700","msg":"TODO: send SMS notification to new user","user_id":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2"}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.375+0700","msg":"TODO: create user profile","user_id":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2"}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.375+0700","msg":"TODO: send onboarding email","email":"testuser1000@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:27:35.375+0700","msg":"user created notification processed successfully","user_id":"498af9cc-5fd1-48b0-86b4-3f65e52cfcc2"}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.380+0700","msg":"received message","topic":"user.events","partition":0,"offset":19,"key":"90097196-1de3-434d-afc4-df759e1d697c"}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.380+0700","msg":"parsed message data","data":{"aggregate_id":"90097196-1de3-434d-afc4-df759e1d697c","email":"flattened2@example.com","event_id":"4b0fdb43-8e29-4d54-90a4-e8439069a9fd","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T15:29:03.361199Z","user_id":"90097196-1de3-434d-afc4-df759e1d697c","username":"flatteneduser2","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.380+0700","msg":"processing user created event","event_id":"4b0fdb43-8e29-4d54-90a4-e8439069a9fd","event_type":"user.created","user_id":"90097196-1de3-434d-afc4-df759e1d697c","username":"flatteneduser2","email":"flattened2@example.com","timestamp":"2025-10-07T15:29:03Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.380+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"4b0fdb43-8e29-4d54-90a4-e8439069a9fd","user_id":"90097196-1de3-434d-afc4-df759e1d697c","username":"flatteneduser2","email":"flattened2@example.com","timestamp":"2025-10-07 15:29:03"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 90097196-1de3-434d-afc4-df759e1d697c
+   👤 Username: flatteneduser2
+   📧 Email: flattened2@example.com
+   ⏰ Timestamp: 2025-10-07 15:29:03
+   🔗 Event ID: 4b0fdb43-8e29-4d54-90a4-e8439069a9fd
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.381+0700","msg":"TODO: send welcome email to new user","email":"flattened2@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.381+0700","msg":"TODO: send SMS notification to new user","user_id":"90097196-1de3-434d-afc4-df759e1d697c"}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.381+0700","msg":"TODO: create user profile","user_id":"90097196-1de3-434d-afc4-df759e1d697c"}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.381+0700","msg":"TODO: send onboarding email","email":"flattened2@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:29:03.381+0700","msg":"user created notification processed successfully","user_id":"90097196-1de3-434d-afc4-df759e1d697c"}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.332+0700","msg":"received message","topic":"user.events","partition":0,"offset":20,"key":"533f22fc-7a6b-4dd3-babb-03879b55e5a9"}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.336+0700","msg":"parsed message data","data":{"aggregate_id":"533f22fc-7a6b-4dd3-babb-03879b55e5a9","email":"flattened21@example.com","event_id":"aa80b15c-7481-4da1-8699-343327a114d1","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T15:31:07.289367Z","user_id":"533f22fc-7a6b-4dd3-babb-03879b55e5a9","username":"flatteneduser21","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.337+0700","msg":"processing user created event","event_id":"aa80b15c-7481-4da1-8699-343327a114d1","event_type":"user.created","user_id":"533f22fc-7a6b-4dd3-babb-03879b55e5a9","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07T15:31:07Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.338+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"aa80b15c-7481-4da1-8699-343327a114d1","user_id":"533f22fc-7a6b-4dd3-babb-03879b55e5a9","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07 15:31:07"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 533f22fc-7a6b-4dd3-babb-03879b55e5a9
+   👤 Username: flatteneduser21
+   📧 Email: flattened21@example.com
+   ⏰ Timestamp: 2025-10-07 15:31:07
+   🔗 Event ID: aa80b15c-7481-4da1-8699-343327a114d1
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.338+0700","msg":"TODO: send welcome email to new user","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.338+0700","msg":"TODO: send SMS notification to new user","user_id":"533f22fc-7a6b-4dd3-babb-03879b55e5a9"}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.338+0700","msg":"TODO: create user profile","user_id":"533f22fc-7a6b-4dd3-babb-03879b55e5a9"}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.338+0700","msg":"TODO: send onboarding email","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:31:07.338+0700","msg":"user created notification processed successfully","user_id":"533f22fc-7a6b-4dd3-babb-03879b55e5a9"}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.722+0700","msg":"received message","topic":"user.events","partition":0,"offset":21,"key":"a6223439-6b57-4574-8ad8-4d5701f8cb1f"}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.726+0700","msg":"parsed message data","data":{"aggregate_id":"a6223439-6b57-4574-8ad8-4d5701f8cb1f","email":"flattened21@example.com","event_id":"d4db50e3-9564-4395-894e-efc2ddce49a1","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T15:34:00.694359Z","user_id":"a6223439-6b57-4574-8ad8-4d5701f8cb1f","username":"flatteneduser21","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.728+0700","msg":"processing user created event","event_id":"d4db50e3-9564-4395-894e-efc2ddce49a1","event_type":"user.created","user_id":"a6223439-6b57-4574-8ad8-4d5701f8cb1f","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07T15:34:00Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.728+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"d4db50e3-9564-4395-894e-efc2ddce49a1","user_id":"a6223439-6b57-4574-8ad8-4d5701f8cb1f","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07 15:34:00"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: a6223439-6b57-4574-8ad8-4d5701f8cb1f
+   👤 Username: flatteneduser21
+   📧 Email: flattened21@example.com
+   ⏰ Timestamp: 2025-10-07 15:34:00
+   🔗 Event ID: d4db50e3-9564-4395-894e-efc2ddce49a1
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.731+0700","msg":"TODO: send welcome email to new user","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.731+0700","msg":"TODO: send SMS notification to new user","user_id":"a6223439-6b57-4574-8ad8-4d5701f8cb1f"}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.731+0700","msg":"TODO: create user profile","user_id":"a6223439-6b57-4574-8ad8-4d5701f8cb1f"}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.731+0700","msg":"TODO: send onboarding email","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:34:00.731+0700","msg":"user created notification processed successfully","user_id":"a6223439-6b57-4574-8ad8-4d5701f8cb1f"}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.804+0700","msg":"received message","topic":"user.events","partition":0,"offset":22,"key":"ec9eb672-8d18-4b89-9ca1-622f8be858fc"}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.806+0700","msg":"parsed message data","data":{"aggregate_id":"ec9eb672-8d18-4b89-9ca1-622f8be858fc","email":"flattened21@example.com","event_id":"489588fb-cead-4611-a774-2805d6e32d83","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T15:39:39.782737Z","user_id":"ec9eb672-8d18-4b89-9ca1-622f8be858fc","username":"flatteneduser21","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.806+0700","msg":"processing user created event","event_id":"489588fb-cead-4611-a774-2805d6e32d83","event_type":"user.created","user_id":"ec9eb672-8d18-4b89-9ca1-622f8be858fc","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07T15:39:39Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.807+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"489588fb-cead-4611-a774-2805d6e32d83","user_id":"ec9eb672-8d18-4b89-9ca1-622f8be858fc","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07 15:39:39"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: ec9eb672-8d18-4b89-9ca1-622f8be858fc
+   👤 Username: flatteneduser21
+   📧 Email: flattened21@example.com
+   ⏰ Timestamp: 2025-10-07 15:39:39
+   🔗 Event ID: 489588fb-cead-4611-a774-2805d6e32d83
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.807+0700","msg":"TODO: send welcome email to new user","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.807+0700","msg":"TODO: send SMS notification to new user","user_id":"ec9eb672-8d18-4b89-9ca1-622f8be858fc"}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.808+0700","msg":"TODO: create user profile","user_id":"ec9eb672-8d18-4b89-9ca1-622f8be858fc"}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.808+0700","msg":"TODO: send onboarding email","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:39:39.808+0700","msg":"user created notification processed successfully","user_id":"ec9eb672-8d18-4b89-9ca1-622f8be858fc"}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.542+0700","msg":"received message","topic":"user.events","partition":0,"offset":23,"key":"65a58b02-14eb-4e78-a689-6f913db1ec4c"}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.543+0700","msg":"parsed message data","data":{"aggregate_id":"65a58b02-14eb-4e78-a689-6f913db1ec4c","email":"testuser2000@example.com","event_id":"6da1683a-eeaf-4f2c-80fe-ae3ab7b7adee","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T15:48:05.48842Z","user_id":"65a58b02-14eb-4e78-a689-6f913db1ec4c","username":"testuser2000","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.546+0700","msg":"processing user created event","event_id":"6da1683a-eeaf-4f2c-80fe-ae3ab7b7adee","event_type":"user.created","user_id":"65a58b02-14eb-4e78-a689-6f913db1ec4c","username":"testuser2000","email":"testuser2000@example.com","timestamp":"2025-10-07T15:48:05Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.546+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"6da1683a-eeaf-4f2c-80fe-ae3ab7b7adee","user_id":"65a58b02-14eb-4e78-a689-6f913db1ec4c","username":"testuser2000","email":"testuser2000@example.com","timestamp":"2025-10-07 15:48:05"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 65a58b02-14eb-4e78-a689-6f913db1ec4c
+   👤 Username: testuser2000
+   📧 Email: testuser2000@example.com
+   ⏰ Timestamp: 2025-10-07 15:48:05
+   🔗 Event ID: 6da1683a-eeaf-4f2c-80fe-ae3ab7b7adee
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.547+0700","msg":"TODO: send welcome email to new user","email":"testuser2000@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.547+0700","msg":"TODO: send SMS notification to new user","user_id":"65a58b02-14eb-4e78-a689-6f913db1ec4c"}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.547+0700","msg":"TODO: create user profile","user_id":"65a58b02-14eb-4e78-a689-6f913db1ec4c"}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.547+0700","msg":"TODO: send onboarding email","email":"testuser2000@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:48:05.547+0700","msg":"user created notification processed successfully","user_id":"65a58b02-14eb-4e78-a689-6f913db1ec4c"}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.488+0700","msg":"received message","topic":"user.events","partition":0,"offset":24,"key":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b"}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"parsed message data","data":{"aggregate_id":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b","email":"flattened21@example.com","event_id":"c2cbb0ae-7e36-4923-8a01-f6263b0a9193","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T15:57:28.460816Z","user_id":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b","username":"flatteneduser21","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"processing user created event","event_id":"c2cbb0ae-7e36-4923-8a01-f6263b0a9193","event_type":"user.created","user_id":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07T15:57:28Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"c2cbb0ae-7e36-4923-8a01-f6263b0a9193","user_id":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07 15:57:28"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b
+   👤 Username: flatteneduser21
+   📧 Email: flattened21@example.com
+   ⏰ Timestamp: 2025-10-07 15:57:28
+   🔗 Event ID: c2cbb0ae-7e36-4923-8a01-f6263b0a9193
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"TODO: send welcome email to new user","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"TODO: send SMS notification to new user","user_id":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b"}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"TODO: create user profile","user_id":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b"}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"TODO: send onboarding email","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T22:57:28.490+0700","msg":"user created notification processed successfully","user_id":"f3256ff8-a372-4dbf-9bae-f2ae5bcadb9b"}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.701+0700","msg":"received message","topic":"user.events","partition":0,"offset":25,"key":"7df0d938-8cf6-4ede-8cea-8919cefb1acb"}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.712+0700","msg":"parsed message data","data":{"aggregate_id":"7df0d938-8cf6-4ede-8cea-8919cefb1acb","email":"flattened21@example.com","event_id":"b5ae44d1-a477-40e7-b871-56f17808aca3","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T16:51:23.597075Z","user_id":"7df0d938-8cf6-4ede-8cea-8919cefb1acb","username":"flatteneduser21","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.715+0700","msg":"processing user created event","event_id":"b5ae44d1-a477-40e7-b871-56f17808aca3","event_type":"user.created","user_id":"7df0d938-8cf6-4ede-8cea-8919cefb1acb","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07T16:51:23Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.715+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"b5ae44d1-a477-40e7-b871-56f17808aca3","user_id":"7df0d938-8cf6-4ede-8cea-8919cefb1acb","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07 16:51:23"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 7df0d938-8cf6-4ede-8cea-8919cefb1acb
+   👤 Username: flatteneduser21
+   📧 Email: flattened21@example.com
+   ⏰ Timestamp: 2025-10-07 16:51:23
+   🔗 Event ID: b5ae44d1-a477-40e7-b871-56f17808aca3
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.717+0700","msg":"TODO: send welcome email to new user","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.717+0700","msg":"TODO: send SMS notification to new user","user_id":"7df0d938-8cf6-4ede-8cea-8919cefb1acb"}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.717+0700","msg":"TODO: create user profile","user_id":"7df0d938-8cf6-4ede-8cea-8919cefb1acb"}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.717+0700","msg":"TODO: send onboarding email","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T23:51:23.717+0700","msg":"user created notification processed successfully","user_id":"7df0d938-8cf6-4ede-8cea-8919cefb1acb"}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.480+0700","msg":"received message","topic":"user.events","partition":0,"offset":26,"key":"e1b7a56a-2fcf-417b-b526-be0fde9c665d"}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.483+0700","msg":"parsed message data","data":{"aggregate_id":"e1b7a56a-2fcf-417b-b526-be0fde9c665d","email":"cacheuser1@example.com","event_id":"3e53f5a2-758e-4e2a-98bc-a6afb82172bd","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T16:55:42.457868Z","user_id":"e1b7a56a-2fcf-417b-b526-be0fde9c665d","username":"cacheuser1","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.483+0700","msg":"processing user created event","event_id":"3e53f5a2-758e-4e2a-98bc-a6afb82172bd","event_type":"user.created","user_id":"e1b7a56a-2fcf-417b-b526-be0fde9c665d","username":"cacheuser1","email":"cacheuser1@example.com","timestamp":"2025-10-07T16:55:42Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.483+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"3e53f5a2-758e-4e2a-98bc-a6afb82172bd","user_id":"e1b7a56a-2fcf-417b-b526-be0fde9c665d","username":"cacheuser1","email":"cacheuser1@example.com","timestamp":"2025-10-07 16:55:42"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: e1b7a56a-2fcf-417b-b526-be0fde9c665d
+   👤 Username: cacheuser1
+   📧 Email: cacheuser1@example.com
+   ⏰ Timestamp: 2025-10-07 16:55:42
+   🔗 Event ID: 3e53f5a2-758e-4e2a-98bc-a6afb82172bd
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.483+0700","msg":"TODO: send welcome email to new user","email":"cacheuser1@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.484+0700","msg":"TODO: send SMS notification to new user","user_id":"e1b7a56a-2fcf-417b-b526-be0fde9c665d"}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.484+0700","msg":"TODO: create user profile","user_id":"e1b7a56a-2fcf-417b-b526-be0fde9c665d"}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.484+0700","msg":"TODO: send onboarding email","email":"cacheuser1@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T23:55:42.484+0700","msg":"user created notification processed successfully","user_id":"e1b7a56a-2fcf-417b-b526-be0fde9c665d"}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.680+0700","msg":"received message","topic":"user.events","partition":0,"offset":27,"key":"770b91fc-7126-4465-9c7d-a8aba90bc5b7"}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.681+0700","msg":"parsed message data","data":{"aggregate_id":"770b91fc-7126-4465-9c7d-a8aba90bc5b7","email":"flattened21@example.com","event_id":"c843026c-2701-4e22-be83-c3001f4fbb45","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T16:59:33.656152Z","user_id":"770b91fc-7126-4465-9c7d-a8aba90bc5b7","username":"flatteneduser21","version":1}}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.681+0700","msg":"processing user created event","event_id":"c843026c-2701-4e22-be83-c3001f4fbb45","event_type":"user.created","user_id":"770b91fc-7126-4465-9c7d-a8aba90bc5b7","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07T16:59:33Z","version":1}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.681+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"c843026c-2701-4e22-be83-c3001f4fbb45","user_id":"770b91fc-7126-4465-9c7d-a8aba90bc5b7","username":"flatteneduser21","email":"flattened21@example.com","timestamp":"2025-10-07 16:59:33"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 770b91fc-7126-4465-9c7d-a8aba90bc5b7
+   👤 Username: flatteneduser21
+   📧 Email: flattened21@example.com
+   ⏰ Timestamp: 2025-10-07 16:59:33
+   🔗 Event ID: c843026c-2701-4e22-be83-c3001f4fbb45
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.682+0700","msg":"TODO: send welcome email to new user","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.682+0700","msg":"TODO: send SMS notification to new user","user_id":"770b91fc-7126-4465-9c7d-a8aba90bc5b7"}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.682+0700","msg":"TODO: create user profile","user_id":"770b91fc-7126-4465-9c7d-a8aba90bc5b7"}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.682+0700","msg":"TODO: send onboarding email","email":"flattened21@example.com"}
+{"level":"INFO","timestamp":"2025-10-07T23:59:33.682+0700","msg":"user created notification processed successfully","user_id":"770b91fc-7126-4465-9c7d-a8aba90bc5b7"}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.925+0700","msg":"received message","topic":"user.events","partition":0,"offset":28,"key":"b648b14c-9d18-4904-a229-a8b270615473"}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"parsed message data","data":{"aggregate_id":"b648b14c-9d18-4904-a229-a8b270615473","email":"cacheuser1@example.com","event_id":"9bd58ca6-b6aa-497c-91a5-552ec89855ef","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T17:04:16.897371Z","user_id":"b648b14c-9d18-4904-a229-a8b270615473","username":"cacheuser1","version":1}}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"processing user created event","event_id":"9bd58ca6-b6aa-497c-91a5-552ec89855ef","event_type":"user.created","user_id":"b648b14c-9d18-4904-a229-a8b270615473","username":"cacheuser1","email":"cacheuser1@example.com","timestamp":"2025-10-07T17:04:16Z","version":1}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"9bd58ca6-b6aa-497c-91a5-552ec89855ef","user_id":"b648b14c-9d18-4904-a229-a8b270615473","username":"cacheuser1","email":"cacheuser1@example.com","timestamp":"2025-10-07 17:04:16"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: b648b14c-9d18-4904-a229-a8b270615473
+   👤 Username: cacheuser1
+   📧 Email: cacheuser1@example.com
+   ⏰ Timestamp: 2025-10-07 17:04:16
+   🔗 Event ID: 9bd58ca6-b6aa-497c-91a5-552ec89855ef
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"TODO: send welcome email to new user","email":"cacheuser1@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"TODO: send SMS notification to new user","user_id":"b648b14c-9d18-4904-a229-a8b270615473"}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"TODO: create user profile","user_id":"b648b14c-9d18-4904-a229-a8b270615473"}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"TODO: send onboarding email","email":"cacheuser1@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:04:16.927+0700","msg":"user created notification processed successfully","user_id":"b648b14c-9d18-4904-a229-a8b270615473"}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.674+0700","msg":"received message","topic":"user.events","partition":0,"offset":29,"key":"56308e3b-0f7d-45ab-a51e-e07d374a5f53"}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.678+0700","msg":"parsed message data","data":{"aggregate_id":"56308e3b-0f7d-45ab-a51e-e07d374a5f53","email":"test1@example.com","event_id":"2be28f58-70f7-48ac-90a5-8cda19536c24","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T17:07:31.645927Z","user_id":"56308e3b-0f7d-45ab-a51e-e07d374a5f53","username":"testuser1","version":1}}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.678+0700","msg":"processing user created event","event_id":"2be28f58-70f7-48ac-90a5-8cda19536c24","event_type":"user.created","user_id":"56308e3b-0f7d-45ab-a51e-e07d374a5f53","username":"testuser1","email":"test1@example.com","timestamp":"2025-10-07T17:07:31Z","version":1}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.678+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"2be28f58-70f7-48ac-90a5-8cda19536c24","user_id":"56308e3b-0f7d-45ab-a51e-e07d374a5f53","username":"testuser1","email":"test1@example.com","timestamp":"2025-10-07 17:07:31"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 56308e3b-0f7d-45ab-a51e-e07d374a5f53
+   👤 Username: testuser1
+   📧 Email: test1@example.com
+   ⏰ Timestamp: 2025-10-07 17:07:31
+   🔗 Event ID: 2be28f58-70f7-48ac-90a5-8cda19536c24
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.679+0700","msg":"TODO: send welcome email to new user","email":"test1@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.679+0700","msg":"TODO: send SMS notification to new user","user_id":"56308e3b-0f7d-45ab-a51e-e07d374a5f53"}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.679+0700","msg":"TODO: create user profile","user_id":"56308e3b-0f7d-45ab-a51e-e07d374a5f53"}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.679+0700","msg":"TODO: send onboarding email","email":"test1@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:07:31.679+0700","msg":"user created notification processed successfully","user_id":"56308e3b-0f7d-45ab-a51e-e07d374a5f53"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.161+0700","msg":"received message","topic":"user.events","partition":0,"offset":30,"key":"1a15834e-8a9c-4dc6-9879-0621f0219b3e"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"parsed message data","data":{"aggregate_id":"1a15834e-8a9c-4dc6-9879-0621f0219b3e","email":"cacheuser2@example.com","event_id":"75da9f7c-5c4b-4c1b-9b54-47c535810b20","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T17:20:44.136944Z","user_id":"1a15834e-8a9c-4dc6-9879-0621f0219b3e","username":"cacheuser2","version":1}}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"processing user created event","event_id":"75da9f7c-5c4b-4c1b-9b54-47c535810b20","event_type":"user.created","user_id":"1a15834e-8a9c-4dc6-9879-0621f0219b3e","username":"cacheuser2","email":"cacheuser2@example.com","timestamp":"2025-10-07T17:20:44Z","version":1}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"75da9f7c-5c4b-4c1b-9b54-47c535810b20","user_id":"1a15834e-8a9c-4dc6-9879-0621f0219b3e","username":"cacheuser2","email":"cacheuser2@example.com","timestamp":"2025-10-07 17:20:44"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 1a15834e-8a9c-4dc6-9879-0621f0219b3e
+   👤 Username: cacheuser2
+   📧 Email: cacheuser2@example.com
+   ⏰ Timestamp: 2025-10-07 17:20:44
+   🔗 Event ID: 75da9f7c-5c4b-4c1b-9b54-47c535810b20
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"TODO: send welcome email to new user","email":"cacheuser2@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"TODO: send SMS notification to new user","user_id":"1a15834e-8a9c-4dc6-9879-0621f0219b3e"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"TODO: create user profile","user_id":"1a15834e-8a9c-4dc6-9879-0621f0219b3e"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"TODO: send onboarding email","email":"cacheuser2@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:44.164+0700","msg":"user created notification processed successfully","user_id":"1a15834e-8a9c-4dc6-9879-0621f0219b3e"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.081+0700","msg":"received message","topic":"user.events","partition":0,"offset":31,"key":"8af1143f-58e2-4c57-a9db-fde9b3447fea"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"parsed message data","data":{"aggregate_id":"8af1143f-58e2-4c57-a9db-fde9b3447fea","email":"notifyuser1@example.com","event_id":"b3ac840c-5513-4549-8aff-12f79d008b7b","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T17:20:52.061966Z","user_id":"8af1143f-58e2-4c57-a9db-fde9b3447fea","username":"notifyuser1","version":1}}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"processing user created event","event_id":"b3ac840c-5513-4549-8aff-12f79d008b7b","event_type":"user.created","user_id":"8af1143f-58e2-4c57-a9db-fde9b3447fea","username":"notifyuser1","email":"notifyuser1@example.com","timestamp":"2025-10-07T17:20:52Z","version":1}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"b3ac840c-5513-4549-8aff-12f79d008b7b","user_id":"8af1143f-58e2-4c57-a9db-fde9b3447fea","username":"notifyuser1","email":"notifyuser1@example.com","timestamp":"2025-10-07 17:20:52"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 8af1143f-58e2-4c57-a9db-fde9b3447fea
+   👤 Username: notifyuser1
+   📧 Email: notifyuser1@example.com
+   ⏰ Timestamp: 2025-10-07 17:20:52
+   🔗 Event ID: b3ac840c-5513-4549-8aff-12f79d008b7b
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"TODO: send welcome email to new user","email":"notifyuser1@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"TODO: send SMS notification to new user","user_id":"8af1143f-58e2-4c57-a9db-fde9b3447fea"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"TODO: create user profile","user_id":"8af1143f-58e2-4c57-a9db-fde9b3447fea"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"TODO: send onboarding email","email":"notifyuser1@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:20:52.082+0700","msg":"user created notification processed successfully","user_id":"8af1143f-58e2-4c57-a9db-fde9b3447fea"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.904+0700","msg":"received message","topic":"user.events","partition":0,"offset":32,"key":"b9cf7290-d2ea-43e0-834d-4c670a06f937"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.906+0700","msg":"parsed message data","data":{"aggregate_id":"b9cf7290-d2ea-43e0-834d-4c670a06f937","email":"cacheuser3@example.com","event_id":"e2964a6b-3a13-45cc-be44-d6564127b6e3","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T17:23:08.886557Z","user_id":"b9cf7290-d2ea-43e0-834d-4c670a06f937","username":"cacheuser3","version":1}}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.907+0700","msg":"processing user created event","event_id":"e2964a6b-3a13-45cc-be44-d6564127b6e3","event_type":"user.created","user_id":"b9cf7290-d2ea-43e0-834d-4c670a06f937","username":"cacheuser3","email":"cacheuser3@example.com","timestamp":"2025-10-07T17:23:08Z","version":1}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.907+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"e2964a6b-3a13-45cc-be44-d6564127b6e3","user_id":"b9cf7290-d2ea-43e0-834d-4c670a06f937","username":"cacheuser3","email":"cacheuser3@example.com","timestamp":"2025-10-07 17:23:08"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: b9cf7290-d2ea-43e0-834d-4c670a06f937
+   👤 Username: cacheuser3
+   📧 Email: cacheuser3@example.com
+   ⏰ Timestamp: 2025-10-07 17:23:08
+   🔗 Event ID: e2964a6b-3a13-45cc-be44-d6564127b6e3
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.908+0700","msg":"TODO: send welcome email to new user","email":"cacheuser3@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.908+0700","msg":"TODO: send SMS notification to new user","user_id":"b9cf7290-d2ea-43e0-834d-4c670a06f937"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.908+0700","msg":"TODO: create user profile","user_id":"b9cf7290-d2ea-43e0-834d-4c670a06f937"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.908+0700","msg":"TODO: send onboarding email","email":"cacheuser3@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:08.908+0700","msg":"user created notification processed successfully","user_id":"b9cf7290-d2ea-43e0-834d-4c670a06f937"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"received message","topic":"user.events","partition":0,"offset":33,"key":"6508f85e-7753-4659-bd13-486af8a78fb0"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"parsed message data","data":{"aggregate_id":"6508f85e-7753-4659-bd13-486af8a78fb0","email":"notifyuser2@example.com","event_id":"15ab22db-2d46-47b5-acbd-fc1c7252ab80","event_type":"user.created","metadata":{"source":"auth-service","version":"1.0.0"},"timestamp":"2025-10-07T17:23:21.599623Z","user_id":"6508f85e-7753-4659-bd13-486af8a78fb0","username":"notifyuser2","version":1}}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"processing user created event","event_id":"15ab22db-2d46-47b5-acbd-fc1c7252ab80","event_type":"user.created","user_id":"6508f85e-7753-4659-bd13-486af8a78fb0","username":"notifyuser2","email":"notifyuser2@example.com","timestamp":"2025-10-07T17:23:21Z","version":1}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"🎉 USER CREATED EVENT RECEIVED!","event_id":"15ab22db-2d46-47b5-acbd-fc1c7252ab80","user_id":"6508f85e-7753-4659-bd13-486af8a78fb0","username":"notifyuser2","email":"notifyuser2@example.com","timestamp":"2025-10-07 17:23:21"}
+
+🚀 NOTIFICATION SERVICE: User Created Event Consumed!
+   📧 User ID: 6508f85e-7753-4659-bd13-486af8a78fb0
+   👤 Username: notifyuser2
+   📧 Email: notifyuser2@example.com
+   ⏰ Timestamp: 2025-10-07 17:23:21
+   🔗 Event ID: 15ab22db-2d46-47b5-acbd-fc1c7252ab80
+   ✅ CQRS + Kafka Flow: SUCCESS!
+
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"TODO: send welcome email to new user","email":"notifyuser2@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"TODO: send SMS notification to new user","user_id":"6508f85e-7753-4659-bd13-486af8a78fb0"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"TODO: create user profile","user_id":"6508f85e-7753-4659-bd13-486af8a78fb0"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"TODO: send onboarding email","email":"notifyuser2@example.com"}
+{"level":"INFO","timestamp":"2025-10-08T00:23:21.613+0700","msg":"user created notification processed successfully","user_id":"6508f85e-7753-4659-bd13-486af8a78fb0"}
+{"level":"ERROR","timestamp":"2025-10-08T01:50:52.799+0700","msg":"failed to read message","error":"fetching message: read tcp [::1]:51146->[::1]:9092: i/o timeout"}

@@ -1,0 +1,41 @@
+server:
+  port: "8086"
+  host: "0.0.0.0"
+
+grpc:
+  port: "50051"
+  host: "0.0.0.0"
+  auth:
+    enabled: false  # Set to true in production
+    jwt_secret: ""  # Set via JWT_SECRET env var
+    jwt_issuer: "microservices"
+    api_key: ""     # Set via GRPC_API_KEY env var for service-to-service auth
+
+database:
+  type: "postgres"
+  host: "${DATABASE_HOST:localhost}"
+  port: ${DATABASE_PORT:5432}
+  username: "${DATABASE_USERNAME:admin_user}"
+  password: "${DATABASE_PASSWORD:admin_password}"
+  name: "${DATABASE_NAME:admin_service}"
+  ssl_mode: "${DATABASE_SSL_MODE:disable}"
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: "1h"
+  conn_max_idle_time: "30m"
+
+logging:
+  level: "${LOG_LEVEL:info}"
+  format: "${LOG_FORMAT:json}"
+  output: "${LOG_OUTPUT:stdout}"
+
+# OpenTelemetry Configuration
+telemetry:
+  enabled: true
+  service_name: "admin-service"
+  service_version: "1.0.0"
+  environment: "${APP_ENV:development}"
+  otlp_endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT:localhost:4318}"
+  jaeger_endpoint: "${OTEL_EXPORTER_JAEGER_ENDPOINT:http://localhost:14268/api/traces}"
+  prometheus_port: "${OTEL_PROMETHEUS_PORT:8888}"
+

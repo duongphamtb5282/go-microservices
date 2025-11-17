@@ -1,0 +1,116 @@
+groups:
+  - name: auth-service-alerts
+    rules:
+      # Critical Alerts
+      - alert: AuthServiceDown
+        expr: up{job="auth-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Auth Service is down"
+          description: "Auth Service has been down for more than 1 minute"
+          runbook_url: "http://localhost:9090/graph?g0.expr=up%7Bjob%3D%22auth-service%22%7D"
+
+      - alert: HighErrorRate
+        expr: rate(http_errors_total[5m]) / rate(http_requests_total[5m]) * 100 > 10
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% (threshold: 10%)"
+          runbook_url: "http://localhost:9090/graph?g0.expr=rate%28http_errors_total%5B5m%5D%29+%2F+rate%28http_requests_total%5B5m%5D%29+*+100"
+
+      # Warning Alerts
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 / 1024 > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }} GB (threshold: 1GB)"
+          runbook_url: "http://localhost:9090/graph?g0.expr=process_resident_memory_bytes+%2F+1024+%2F+1024+%2F+1024"
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_user_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% (threshold: 80%)"
+          runbook_url: "http://localhost:9090/graph?g0.expr=rate%28process_cpu_user_seconds_total%5B5m%5D%29+*+100"
+
+      - alert: HighGoroutineCount
+        expr: go_goroutines > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High goroutine count"
+          description: "Goroutine count is {{ $value }} (threshold: 100)"
+          runbook_url: "http://localhost:9090/graph?g0.expr=go_goroutines"
+
+      - alert: SlowRequests
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow HTTP requests"
+          description: "95th percentile response time is {{ $value }}s (threshold: 1s)"
+          runbook_url: "http://localhost:9090/graph?g0.expr=histogram_quantile%280.95%2C+rate%28http_request_duration_seconds_bucket%5B5m%5D%29%29"
+
+  - name: infrastructure-alerts
+    rules:
+      # PostgreSQL Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database is not responding"
+
+      # Kafka Alerts  
+      - alert: KafkaDown
+        expr: up{job="kafka"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Kafka is down"
+          description: "Kafka message broker is not responding"
+
+      # System Alerts
+      - alert: NodeDown
+        expr: up{job="node-exporter"} == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Node exporter is down"
+          description: "System metrics exporter is not responding"
+
+  - name: meta-alerts
+    rules:
+      - alert: PrometheusRuleEvaluationSlow
+        expr: prometheus_rule_evaluation_duration_seconds{quantile="0.9"} > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus rule evaluation is slow"
+          description: "Rule evaluation is taking {{ $value }}s (90th percentile)"
+
+      - alert: PrometheusTargetScrapingSlow
+        expr: prometheus_target_interval_length_seconds{quantile="0.9"} > 30
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus target scraping is slow"
+          description: "Target scraping is taking {{ $value }}s (90th percentile)"

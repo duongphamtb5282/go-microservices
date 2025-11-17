@@ -1,0 +1,9 @@
+# Redis Standalone Configuration Example
+redis:
+  name: "microservices-redis-standalone"
+  addr: "localhost:6379"
+  password: ""                    # Leave empty if no password
+  db: 0                          # Database number (0-15)
+  useCluster: false              # Standalone mode
+  clusterAddrs: []               # Not used in standalone mode
+  pool_size: 10                  # Connection pool size

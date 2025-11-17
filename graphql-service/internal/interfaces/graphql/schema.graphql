@@ -1,0 +1,224 @@
+# GraphQL Schema for GraphQL Service with MongoDB
+type User {
+  id: ID!
+  username: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+  orders: [Order!]!
+  notifications: [Notification!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Order {
+  id: ID!
+  userId: ID!
+  user: User!
+  items: [OrderItem!]!
+  status: OrderStatus!
+  totalAmount: Float!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type OrderItem {
+  id: ID!
+  productId: ID!
+  product: Product!
+  quantity: Int!
+  price: Float!
+  subtotal: Float!
+}
+
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  price: Float!
+  category: String!
+  stock: Int!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Notification {
+  id: ID!
+  userId: ID!
+  user: User!
+  type: NotificationType!
+  title: String!
+  message: String!
+  read: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum NotificationType {
+  ORDER_CREATED
+  ORDER_UPDATED
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  WELCOME
+  PROMOTION
+}
+
+input UserFilter {
+  username: String
+  email: String
+  firstName: String
+  lastName: String
+}
+
+input OrderFilter {
+  userId: ID
+  status: OrderStatus
+  minAmount: Float
+  maxAmount: Float
+}
+
+input ProductFilter {
+  name: String
+  category: String
+  minPrice: Float
+  maxPrice: Float
+}
+
+input NotificationFilter {
+  userId: ID
+  type: NotificationType
+  read: Boolean
+}
+
+input Pagination {
+  page: Int
+  limit: Int
+  offset: Int
+}
+
+input CreateUserInput {
+  username: String!
+  email: String!
+  firstName: String!
+  lastName: String!
+}
+
+input UpdateUserInput {
+  username: String
+  email: String
+  firstName: String
+  lastName: String
+}
+
+input CreateOrderInput {
+  userId: ID!
+  items: [CreateOrderItemInput!]!
+}
+
+input CreateOrderItemInput {
+  productId: ID!
+  quantity: Int!
+}
+
+input UpdateOrderStatusInput {
+  status: OrderStatus!
+}
+
+input CreateProductInput {
+  name: String!
+  description: String
+  price: Float!
+  category: String!
+  stock: Int!
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  price: Float
+  category: String
+  stock: Int
+}
+
+input CreateNotificationInput {
+  userId: ID!
+  type: NotificationType!
+  title: String!
+  message: String!
+}
+
+input UpdateNotificationInput {
+  read: Boolean
+}
+
+type Query {
+  # User queries
+  user(id: ID!): User
+  users(filter: UserFilter, pagination: Pagination): [User!]!
+
+  # Order queries
+  order(id: ID!): Order
+  orders(filter: OrderFilter, pagination: Pagination): [Order!]!
+  userOrders(
+    userId: ID!
+    filter: OrderFilter
+    pagination: Pagination
+  ): [Order!]!
+
+  # Product queries
+  product(id: ID!): Product
+  products(filter: ProductFilter, pagination: Pagination): [Product!]!
+
+  # Notification queries
+  notification(id: ID!): Notification
+  notifications(
+    filter: NotificationFilter
+    pagination: Pagination
+  ): [Notification!]!
+  userNotifications(
+    userId: ID!
+    filter: NotificationFilter
+    pagination: Pagination
+  ): [Notification!]!
+}
+
+type Mutation {
+  # User mutations
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
+
+  # Order mutations
+  createOrder(input: CreateOrderInput!): Order!
+  updateOrderStatus(id: ID!, input: UpdateOrderStatusInput!): Order!
+  cancelOrder(id: ID!): Order!
+
+  # Product mutations
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(id: ID!, input: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
+
+  # Notification mutations
+  createNotification(input: CreateNotificationInput!): Notification!
+  updateNotification(id: ID!, input: UpdateNotificationInput!): Notification!
+  deleteNotification(id: ID!): Boolean!
+  markNotificationAsRead(id: ID!): Notification!
+  markAllNotificationsAsRead(userId: ID!): [Notification!]!
+}
+
+type Subscription {
+  # Real-time subscriptions
+  orderStatusChanged(userId: ID!): Order!
+  userCreated: User!
+  notificationCreated(userId: ID!): Notification!
+  productStockUpdated: Product!
+}

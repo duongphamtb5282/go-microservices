@@ -1,0 +1,227 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "go: build auth-service",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "build",
+                "-o",
+                "${workspaceFolder}/bin/auth-service",
+                "${workspaceFolder}/cmd/http/main.go"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$go"
+        },
+        {
+            "label": "go: build migrate",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "build",
+                "-o",
+                "${workspaceFolder}/bin/migrate",
+                "${workspaceFolder}/cmd/migrate/main.go"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$go"
+        },
+        {
+            "label": "go: build secret-generator",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "build",
+                "-o",
+                "${workspaceFolder}/bin/secret-generator",
+                "${workspaceFolder}/cmd/secret-generator/main.go"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$go"
+        },
+        {
+            "label": "go: run air (hot reload)",
+            "type": "shell",
+            "command": "air",
+            "args": [],
+            "group": "build",
+            "isBackground": true,
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "go: mod tidy",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "mod",
+                "tidy"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$go"
+        },
+        {
+            "label": "go: test",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "test",
+                "./..."
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$go"
+        },
+        {
+            "label": "go: test with coverage",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "test",
+                "-coverprofile=coverage.out",
+                "./..."
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$go"
+        },
+        {
+            "label": "go: lint",
+            "type": "shell",
+            "command": "golangci-lint",
+            "args": [
+                "run"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": "$go"
+        },
+        {
+            "label": "go: fmt",
+            "type": "shell",
+            "command": "go",
+            "args": [
+                "fmt",
+                "./..."
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "docker: up dev",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": [
+                "-f",
+                "docker-compose.dev.yml",
+                "up",
+                "-d"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "docker: down",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": [
+                "-f",
+                "docker-compose.dev.yml",
+                "down"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        }
+    ]
+}

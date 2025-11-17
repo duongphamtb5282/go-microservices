@@ -1,0 +1,15 @@
+# Redis Cluster Configuration Example
+redis:
+  name: "microservices-redis-cluster"
+  addr: ""                       # Not used in cluster mode
+  password: ""                   # Leave empty if no password
+  db: 0                          # Must be 0 in cluster mode
+  useCluster: true               # Enable cluster mode
+  clusterAddrs:                  # Cluster node addresses
+    - "localhost:7000"
+    - "localhost:7001"
+    - "localhost:7002"
+    - "localhost:7003"
+    - "localhost:7004"
+    - "localhost:7005"
+  pool_size: 20                  # Connection pool size (higher for cluster)

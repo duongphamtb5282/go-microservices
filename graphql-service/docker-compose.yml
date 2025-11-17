@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: graphql-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin_password
+      MONGO_INITDB_DATABASE: graphql_service
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - graphql-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # GraphQL Service
+  graphql-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: graphql-service
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "8086:8086"
+    environment:
+      # MongoDB
+      MONGO_URI: mongodb://admin:admin_password@mongodb:27017/graphql_service?authSource=admin
+
+      # Application
+      APP_ENV: development
+      LOG_LEVEL: debug
+      PORT: 8086
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+    networks:
+      - graphql-network
+    profiles:
+      - dev
+
+  # GraphQL Playground (optional)
+  graphql-playground:
+    image: node:18-alpine
+    container_name: graphql-playground
+    ports:
+      - "8087:8080"
+    command: >
+      sh -c "
+        npm install -g graphql-playground-server &&
+        graphql-playground-server --endpoint http://graphql-service:8086/query --port 8080
+      "
+    depends_on:
+      - graphql-service
+    networks:
+      - graphql-network
+    profiles:
+      - dev
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  graphql-network:
+    driver: bridge
